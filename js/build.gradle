@@ -1,0 +1,45 @@
+buildscript {
+    ext.kotlin_version = '1.2.0-beta-88'
+
+    repositories {
+        maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.2' }
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath "com.moowork.gradle:gradle-node-plugin:1.2.0"
+    }
+}
+
+apply plugin: 'kotlin-platform-js'
+apply plugin: 'kotlin-dce-js'
+
+apply plugin: 'com.moowork.node'
+
+repositories {
+    maven { url 'http://dl.bintray.com/kotlin/kotlin-eap-1.2' }
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    compile "org.jetbrains.kotlin:kotlin-stdlib-js:$kotlin_version"
+    expectedBy project(":common")
+
+    testCompile "org.jetbrains.kotlin:kotlin-test:$kotlin_version"
+    testCompile "org.jetbrains.kotlin:kotlin-test-js:$kotlin_version"
+}
+
+task yarnInstall(type: YarnTask) {
+    args = ["install"]
+}
+
+task runKarma(type: YarnTask, dependsOn: ["yarnInstall", "copyDependenciesKotlinJs", "copyDependenciesTestKotlinJs"]) {
+    args = ["test"]
+}
+
+test.dependsOn runKarma
+
